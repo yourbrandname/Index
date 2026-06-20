@@ -1,1 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Menu</title>
+    <style>
+        :root {
+            --primary-orange: #f27a18;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #333333;
+            --text-white: #ffffff;
+            --light-grey: #f8f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-grey);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+        }
+
+        .mobile-container {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--dark-bg);
+            color: var(--text-white);
+            padding: 20px 16px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .categories {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            background-color: var(--dark-bg);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-btn {
+            background-color: #2a2a2a;
+            color: #b3b3b3;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .category-btn.active {
+            background-color: var(--primary-orange);
+            color: var(--text-white);
+        }
+
+        .menu-list {
+            padding: 16px;
+            flex-grow: 1;
+            padding-bottom: 100px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: cover;
+            background-color: #f0f0f0;
+            margin-right: 16px;
+        }
+
+        .item-details {
+            flex-grow: 1;
+        }
+
+        .item-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #111;
+        }
+
+        .item-price {
+            color: var(--primary-orange);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .action-container {
+            min-width: 90px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .add-btn {
+            background: #ffffff;
+            color: #111;
+            border: 1px solid #ccc;
+            padding: 6px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .menu-qty-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--primary-orange);
+            border-radius: 6px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .menu-qty-btn {
+            background: none;
+            border: none;
+            color: var(--primary-orange);
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+
+        .menu-qty-val {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #111;
+        }
+
+        .footer-cart {
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            background: #ffffff;
+            padding: 16px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        }
+
+        .view-cart-btn {
+            background-color: var(--primary-orange);
+            color: var(--text-white);
+            width: 100%;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            z-index: 1000;
+            transition: transform 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.15);
+        }
+
+        .cart-drawer.open {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .cart-header {
+            padding: 20px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-cart {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .cart-items-list {
+            padding: 16px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .qty-btn {
+            background: #e0e0e0;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .qty-val {
+            font-weight: 600;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .cart-footer {
+            padding: 16px;
+            border-top: 1px solid #eee;
+            background: #fafafa;
+        }
+
+        .table-input-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .table-input-group label {
+            font-weight: 600;
+        }
+
+        .table-input-group input {
+            width: 90px;
+            padding: 8px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .table-input-group input:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+        }
+
+        .cart-notice {
+            background: #fff4e5;
+            color: #663c00;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            border-left: 4px solid #ffa117;
+            font-weight: 500;
+        }
+
+        .sms-btn {
+            background-color: #25D366;
+            color: white;
+            width: 100%;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="mobile-container">
+    <header>
+        <h1>Our Menu</h1>
+    </header>
+
+    <div class="categories">
+        <button class="category-btn active" onclick="filterCategory('all', this)">All</button>
+        <button class="category-btn" onclick="filterCategory('starters', this)">Starters</button>
+        <button class="category-btn" onclick="filterCategory('main course', this)">Main Course</button>
+        <button class="category-btn" onclick="filterCategory('beverages', this)">Beverages</button>
+    </div>
+
+    <div class="menu-list" id="menu-items-container"></div>
+
+    <div class="footer-cart">
+        <button class="view-cart-btn" onclick="toggleCart(true)">View Cart (<span id="cart-count">0</span>)</button>
+    </div>
+</div>
+
+<div class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+        <h2>Your Order</h2>
+        <button class="close-cart" onclick="toggleCart(false)">&times;</button>
+    </div>
+    
+    <div class="cart-items-list" id="cart-items-container"></div>
+
+    <div class="cart-footer">
+        <div class="table-input-group">
+            <label for="table-number">Table Number <span style="color: red;">*</span>:</label>
+            <input type="number" id="table-number" min="1" max="50" placeholder="e.g. 5">
+        </div>
+
+        <div class="cart-notice">
+            ℹ️ Share the text message details at the billing counter to confirm your order and begin food preparation.
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-weight: bold;">
+            <span>Total:</span>
+            <span id="cart-total">₹0</span>
+        </div>
+        <button class="sms-btn" onclick="placeOrderDirectSMS()">Place Order via SMS</button>
+    </div>
+</div>
+
+<script>
+    const RESTAURANT_SMS_NUMBER = "9353427990"; 
+    let activeCategory = "all";
+
+    const menuData = [
+        { id: 1, name: "Margherita Pizza", price: 249, category: "main course", img: "https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=150" },
+        { id: 2, name: "Pasta Alfredo", price: 229, category: "main course", img: "https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=150" },
+        { id: 3, name: "Paneer Tikka", price: 199, category: "starters", img: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=150" },
+        { id: 4, name: "Lemonade", price: 99, category: "beverages", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=150" }
+    ];
+
+    let cart = {};
+
+    function renderMenu() {
+        const container = document.getElementById('menu-items-container');
+        container.innerHTML = '';
+        
+        const filteredItems = activeCategory === 'all' ? menuData : menuData.filter(item => item.category === activeCategory);
+
+        filteredItems.forEach(item => {
+            const currentQty = cart[item.id] ? cart[item.id].quantity : 0;
+            let actionHtml = currentQty > 0 ? `
+                <div class="menu-qty-controls">
+                    <button class="menu-qty-btn" onclick="changeQuantity(${item.id}, -1)">-</button>
+                    <span class="menu-qty-val">${currentQty}</span>
+                    <button class="menu-qty-btn" onclick="changeQuantity(${item.id}, 1)">+</button>
+                </div>
+            ` : `<button class="add-btn" onclick="addToCart(${item.id})">ADD</button>`;
+
+            container.innerHTML += `
+                <div class="menu-item">
+                    <img class="item-img" src="${item.img}" alt="${item.name}">
+                    <div class="item-details">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">₹${item.price}</div>
+                    </div>
+                    <div class="action-container">${actionHtml}</div>
+                </div>
+            `;
+        });
+    }
+
+    function filterCategory(category, button) {
+        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        activeCategory = category;
+        renderMenu();
+    }
+
+    // Handles adding item to structural dynamic data object matrix
+    function addToCart(id) {
+        if(cart[id]) { cart[id].quantity += 1; } 
+        else { cart[id] = { ...menuData.find(p => p.id === id), quantity: 1 }; }
+        updateCartUI();
+        renderMenu();
+    }
+
+    function changeQuantity(id, delta) {
+        if (!cart[id]) return;
+        cart[id].quantity += delta;
+        if (cart[id].quantity <= 0) delete cart[id];
+        updateCartUI();
+        renderMenu();
+    }
+
+    function updateCartUI() {
+        let totalItems = 0, totalPrice = 0;
+        const cartContainer = document.getElementById('cart-items-container');
+        cartContainer.innerHTML = '';
+
+        Object.values(cart).forEach(item => {
+            totalItems += item.quantity;
+            totalPrice += item.price * item.quantity;
+            cartContainer.innerHTML += `
+                <div class="cart-item">
+                    <div>
+                        <div style="font-weight:600;">${item.name}</div>
+                        <div style="color:var(--primary-orange); font-size:0.9rem;">₹${item.price * item.quantity}</div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="qty-btn" onclick="changeQuantity(${item.id}, -1)">-</button>
+                        <span class="qty-val">${item.quantity}</span>
+                        <button class="qty-btn" onclick="changeQuantity(${item.id}, 1)">+</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('cart-count').innerText = totalItems;
+        document.getElementById('cart-total').innerText = `₹${totalPrice}`;
+        if (totalItems === 0) {
+            cartContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Your cart is empty</p>';
+        }
+    }
+
+    function toggleCart(isOpen) {
+        const drawer = document.getElementById('cart-drawer');
+        if(isOpen) drawer.classList.add('open');
+        else drawer.classList.remove('open');
+    }
+
+    function placeOrderDirectSMS() {
+        const tableField = document.getElementById('table-number');
+        const tableNum = tableField.value.trim();
+        const cartItems = Object.values(cart);
+        
+        if (cartItems.length === 0) {
+            alert("Cart is empty!");
+            return;
+        }
+
+        if (!tableNum || parseInt(tableNum) <= 0) {
+            alert("Enter a valid Table Number!");
+            tableField.focus();
+            return;
+        }
+
+        // Generate Short unique 4-Character Order ID mapping string
+        const randomNum = Math.floor(10 + Math.random() * 90); 
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ"; 
+        const c1 = chars.charAt(Math.floor(Math.random() * chars.length));
+        const c2 = chars.charAt(Math.floor(Math.random() * chars.length));
+        const shortID = `${c1}${randomNum}${c2}`;
+
+        // Condensed detailed text string formatting structure
+        let textMessage = `ORDER ID: ${shortID}\nTBL: ${tableNum}\n`;
+        let total = 0;
+        cartItems.forEach(item => {
+            textMessage += `${item.name} x${item.quantity}\n`;
+            total += item.price * item.quantity;
+        });
+        textMessage += `TOTAL: ₹${total}\n\n[Please present this Order ID at the billing counter to confirm your order details and begin food preparation.]`;
+
+        // Direct SMS framework intent execution
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const separator = isIOS ? '&' : '?';
+        window.location.href = `sms:${RESTAURANT_SMS_NUMBER}${separator}body=${encodeURIComponent(textMessage)}`;
+
+        // Global states reset configuration parameters
+        cart = {};
+        tableField.value = "";
+        updateCartUI();
+        renderMenu();
+        toggleCart(false);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        renderMenu();
+    });
+</script>
+
+</body>
+</html>
 
